@@ -1,5 +1,5 @@
 import axios from "axios";
-import { myEnv } from "./backend";
+import { BackendResponse, myEnv } from "./backend";
 
 export const http = axios.create({
   baseURL: myEnv.backendUrlApi,
@@ -8,7 +8,6 @@ export const http = axios.create({
 //Creazione di un intercettore per mappare la richiesta del backend
 http.interceptors.response.use(
   (response) => {
-    //ci prendiamo i dati
     const backendData = response.data;
 
     // Se il backend risponde con success: false

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import NavLink from "next/link";
 import { usePathname } from "next/navigation";
+import { Button } from "./ui/button";
 
 const links = [
   {
@@ -28,10 +29,20 @@ const Header = () => {
   const pathname = usePathname();
 
   return (
-    <header className="w-full bg-white py-4 sticky top-0">
+    <header className="w-full bg-white py-4 sticky top-0 z-50">
       <div className="container mx-auto flex justify-between px-4">
-        <Link href={"/"} aria-label="Ritorna alla home" className="flex items-center gap-2">
-          <Image src={logo} alt="Logo di TravelEx" className="size-8" width={64} height={64} />
+        <Link
+          href={"/"}
+          aria-label="Ritorna alla home"
+          className="flex items-center gap-2"
+        >
+          <Image
+            src={logo}
+            alt="Logo di TravelEx"
+            className="size-8"
+            width={64}
+            height={64}
+          />
           <p className="text-primary h6 italic">TravelEx</p>
         </Link>
 
@@ -40,10 +51,7 @@ const Header = () => {
           <SheetTrigger className="p-2 text-primary cursor-pointer">
             <Menu size={24} />
           </SheetTrigger>
-          <SheetContent
-            side="right"
-            className="w-full pt-12"
-          >
+          <SheetContent side="right" className="w-full pt-12">
             <SheetTitle className="sr-only">Menù di navigazione</SheetTitle>
             <nav className="flex flex-col">
               {/* Link di navigazione */}
@@ -51,7 +59,8 @@ const Header = () => {
                 <NavLink
                   className={cn(
                     "font-semibold duration-300 px-4 py-3 text-2xl",
-                    pathname === obj.href && "bg-primary text-primary-foreground",
+                    pathname === obj.href &&
+                      "bg-primary text-primary-foreground",
                     pathname !== obj.href && "hover:text-secondary",
                   )}
                   key={obj.title}
@@ -60,6 +69,7 @@ const Header = () => {
                   {obj.title}
                 </NavLink>
               ))}
+              {/* <Button onClick={}>Logout</Button> */}
             </nav>
           </SheetContent>
         </Sheet>

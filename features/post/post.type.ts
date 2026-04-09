@@ -4,12 +4,12 @@ import { User } from "../user/user.type";
 export type Post = {
   id: string;
   location: string;
-  slug: string;
   description: string;
   country: string;
   img: string | undefined;
-  countLikes: number;
+  likes: number;
   countComments: number;
   author: User | undefined;
-  comments: Comment[]
+  comments: Comment[];
+  likedByMe: boolean;
 };

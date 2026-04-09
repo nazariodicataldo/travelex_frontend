@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
 import Providers from "./providers";
 import CreatePost from "@/components/CreatePost";
+import { Toaster } from "@/components/ui/sonner";
+import { getAuthToken } from "@/features/auth/auth.actions";
 
 const notoSerifHeading = Noto_Serif({
   subsets: ["latin"],
@@ -29,7 +31,7 @@ export const metadata: Metadata = {
     "Esplora, salva e condividi esperienze di viaggio insieme ad altri migliaia di utenti",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -49,10 +51,11 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background">
         <Header />{" "}
-        <main className="mt-12 container mx-auto px-4">
+        <main className="my-12 container mx-auto px-4">
           <Providers>{children}</Providers>
+          <CreatePost />
         </main>
-        <CreatePost />
+        <Toaster />
       </body>
     </html>
   );

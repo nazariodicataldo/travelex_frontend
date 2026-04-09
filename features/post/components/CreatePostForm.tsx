@@ -6,6 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Country, CountryDropdown } from "@/components/ui/CountryDropdown";
 import { Button } from "@/components/ui/button";
+import { createPost } from "@/app/actions";
+import { toast } from "sonner";
+import axios from "axios";
+import { redirect } from "next/navigation";
 
 const createPostFormSchema = z.object({
   location: z.string({ error: "Location required" }).min(1).max(30),
@@ -16,18 +20,30 @@ const createPostFormSchema = z.object({
 export type CreatePostData = z.infer<typeof createPostFormSchema>;
 
 const CreatePostForm = () => {
-  const { register, handleSubmit, formState, control } =
+  const { register, handleSubmit, formState, control, reset } =
     useForm<CreatePostData>({
       resolver: zodResolver(createPostFormSchema),
     });
 
-  function createPost(data: CreatePostData) {
-    console.log(data);
-  }
+  const onSubmit = async (data: CreatePostData) => {
+    try {
+      await createPost(data);
+      toast.success("Post has been created", { position: "bottom-right" });
+      reset();
+
+      /* Redirect sull'home page*/
+      redirect("/");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Form submission error",
+        { position: "bottom-right" },
+      );
+    }
+  };
 
   return (
     <form
-      onSubmit={handleSubmit(createPost)}
+      onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-4 w-full md:w-sm lg:w-lg mx-auto"
     >
       {/* Location */}

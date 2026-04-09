@@ -3,6 +3,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { getAuthToken } from "@/features/auth/auth.actions";
 import PostsGrid from "@/features/post/components/PostsGrid";
 import { PostParams, PostService } from "@/features/post/post.service";
 import {
@@ -20,11 +21,13 @@ export const DEFAULT_PARAMS: PostParams = {
 };
 
 export default async function Home() {
+  const token = await getAuthToken();
+
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
-    queryKey: ["posts", DEFAULT_PARAMS],
-    queryFn: () => PostService.index(DEFAULT_PARAMS),
+    queryKey: ["posts", JSON.stringify(DEFAULT_PARAMS)],
+    queryFn: () => PostService.index(DEFAULT_PARAMS, token ?? undefined),
   });
 
   return (

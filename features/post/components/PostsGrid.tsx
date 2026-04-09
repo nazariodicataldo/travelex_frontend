@@ -1,18 +1,13 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
-import { PostService } from "../post.service";
-import { useFilterStore } from "@/lib/store";
 import { Skeleton } from "@/components/ui/skeleton";
 import PostCard from "./PostCard";
+import { usePostsQuery } from "../post.queries";
+import { useAuthUserStore } from "@/features/auth/auth.store";
 
 const PostsGrid = () => {
-  // Recuperi solo i filtri
-  const filters = useFilterStore((state) => state.filters);
+  const token = useAuthUserStore((state) => state.token);
 
-  const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["posts", filters],
-    queryFn: () => PostService.index(filters),
-  });
+  const { data: posts = [], isLoading } = usePostsQuery(token);
 
   if (isLoading) {
     return (

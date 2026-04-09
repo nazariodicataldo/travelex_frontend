@@ -11,12 +11,26 @@ import { Heart, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import placeholder from "../../../public/placeholder.jpg";
+import { countries } from "country-data-list";
+import { CircleFlag } from "react-circle-flags";
+import { Country } from "@/components/ui/CountryDropdown";
+import { cn } from "@/lib/utils";
+import { useLikeMutation } from "../post.queries";
+import { useAuthUserStore } from "@/features/auth/auth.store";
 
 type PostProps = {
   post: Post;
 };
 
 const PostCard = ({ post }: PostProps) => {
+  const token = useAuthUserStore((state) => state.token);
+
+  const { mutate, isPending } = useLikeMutation();
+
+  const country = countries.all.find(
+    (country: Country) => country.alpha3 === post.country,
+  );
+
   return (
     <Card className="relative gap-0">
       <Link
@@ -30,17 +44,38 @@ const PostCard = ({ post }: PostProps) => {
           alt={`Featured image about ${post.author?.username}'s post`}
         />
       </CardHeader>
-      <CardFooter className="flex flex-col gap-2 items-start">
+      <CardFooter className="flex flex-col gap-2 items-start bg-card">
         <div className="flex gap-2 z-2">
-          <Button variant={'outline'} size={"icon"}>
-            <Heart />
+          <Button
+            variant={"outline"}
+            disabled={isPending}
+            onClick={() => {
+              if (!token) return;
+              mutate({ postId: post.id, token });
+            }}
+          >
+            <Heart
+              className={cn(
+                post.likedByMe ? "fill-red-500" : "fill-transparent",
+              )}
+            />{" "}
+            {post.likes}
           </Button>
-          <Button variant={'outline'} size={"icon"}>
+          <Button variant={"outline"}>
             <MessageCircle />
           </Button>
         </div>
         <small>{post.author?.username}</small>
-        <CardTitle>{post.location} </CardTitle>
+        <CardTitle className="flex gap-2">
+          {country !== undefined && (
+            <CircleFlag
+              countryCode={country.alpha2.toLowerCase()}
+              height={20}
+              width={20}
+            />
+          )}
+          <p>{post.location}</p>
+        </CardTitle>
         <CardDescription>{post.description} </CardDescription>
       </CardFooter>
     </Card>

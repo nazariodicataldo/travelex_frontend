@@ -27,7 +27,7 @@ import { CircleFlag } from "react-circle-flags";
 import { countries } from "country-data-list";
 
 // Country interface
-export interface Country {
+export type Country = {
   alpha2: string;
   alpha3: string;
   countryCallingCodes: string[];
