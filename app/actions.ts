@@ -8,7 +8,7 @@ import { cookies } from "next/headers";
 export async function createPost(data: CreatePostData): Promise<Post> {
   const token = (await cookies()).get("auth-token")?.value;
 
-  if (!token) throw new Error("Non autorizzato");
+  if (!token) throw new Error("Unauthorized");
 
   return await PostService.store(data, token);
 }

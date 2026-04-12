@@ -8,7 +8,6 @@ import { Country, CountryDropdown } from "@/components/ui/CountryDropdown";
 import { Button } from "@/components/ui/button";
 import { createPost } from "@/app/actions";
 import { toast } from "sonner";
-import axios from "axios";
 import { redirect } from "next/navigation";
 
 const createPostFormSchema = z.object({

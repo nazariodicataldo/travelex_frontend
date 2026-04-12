@@ -1,4 +1,4 @@
-import { Comment } from "../like/like.type";
+import { Comment } from "../comment/comment.type";
 import { User } from "../user/user.type";
 
 export type Post = {
@@ -8,7 +8,7 @@ export type Post = {
   country: string;
   img: string | undefined;
   likes: number;
-  countComments: number;
+  commentsCount: number;
   author: User | undefined;
   comments: Comment[];
   likedByMe: boolean;

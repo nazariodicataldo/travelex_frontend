@@ -3,6 +3,7 @@ import { PostService } from "./post.service";
 import { useFilterStore } from "@/lib/store";
 import { LikeService } from "../like/like.service";
 import { Post } from "../post/post.type";
+import { toast } from "sonner";
 
 export function usePostsQuery(token?: string) {
   // Recuperi solo i filtri
@@ -11,6 +12,13 @@ export function usePostsQuery(token?: string) {
   return useQuery({
     queryKey: ["posts", JSON.stringify(filters)], // <-- stringa, confronto per valore
     queryFn: () => PostService.index(filters, token),
+  });
+}
+
+export function useSinglePostQuery(id: string, token?: string) {
+  return useQuery({
+    queryKey: ["posts", { id }],
+    queryFn: () => PostService.show(id, token),
   });
 }
 
@@ -26,47 +34,66 @@ export function useLikeMutation() {
     mutationFn: ({ postId, token }: { postId: string; token: string }) =>
       LikeService.toggle({ postId, token }),
     onMutate: async ({ postId }) => {
-      // 1. Blocca eventuali refetch in corso sulla query "posts"
-      //    perché potrebbero sovrascrivere il nostro update ottimistico
-      await queryClient.cancelQueries({
-        queryKey: ["posts", filtersStringified],
-      });
+      const postsKey = ["posts", filtersStringified];
+      const singlePostKey = ["posts", { id: postId }];
 
-      // 2. Salva snapshot dei dati attuali — serve per il rollback
-      const previous = queryClient.getQueryData(["posts", filtersStringified]);
+      // 1. Cancella refetch in corso per entrambi
+      await queryClient.cancelQueries({ queryKey: postsKey });
+      await queryClient.cancelQueries({ queryKey: singlePostKey });
 
-      // 3. Modifica la cache direttamente, senza aspettare il server
-      queryClient.setQueryData(["posts", filtersStringified], (old: Post[]) =>
-        old.map((p) => {
-          if (p.id !== postId) return p; // gli altri post non cambiano
+      // 2. Snapshot di entrambi per rollback
+      const previousPosts = queryClient.getQueryData<Post[]>(postsKey);
+      const previousSingle = queryClient.getQueryData<Post>(singlePostKey);
 
-          // Inverte lo stato del like e aggiusta il contatore
-          return {
-            ...p,
-            likedByMe: !p.likedByMe,
-            likes: p.likedByMe
-              ? p.likes - 1 // stava a true, ora toglie
-              : p.likes + 1, // stava a false, ora aggiunge
-          };
-        }),
+      // 3. Update Ottimistico Lista
+      queryClient.setQueryData<Post[]>(postsKey, (old) =>
+        old?.map((p) =>
+          p.id === postId
+            ? {
+                ...p,
+                likedByMe: !p.likedByMe,
+                likes: p.likedByMe ? p.likes - 1 : p.likes + 1,
+              }
+            : p,
+        ),
+      );
+
+      // 4. Update Ottimistico Singolo Post
+      queryClient.setQueryData<Post>(singlePostKey, (old) =>
+        old
+          ? {
+              ...old,
+              likedByMe: !old.likedByMe,
+              likes: old.likedByMe ? old.likes - 1 : old.likes + 1,
+            }
+          : old,
       );
 
       // 4. Ritorna lo snapshot — React Query lo passa a onError come context
-      return { previous };
+      return { previousPosts, previousSingle, postId };
     },
-    onError: (_err, _postId, context) => {
+    onError: (err, _postId, context) => {
+      toast.error(err.message, { position: "bottom-right" });
       // La chiamata è fallita — ripristina i dati precedenti
-      queryClient.setQueryData(
-        ["posts", filtersStringified],
-        context?.previous,
-      );
+      if (context?.previousPosts)
+        queryClient.setQueryData(
+          ["posts", filtersStringified],
+          context.previousPosts,
+        );
+      if (context?.previousSingle)
+        queryClient.setQueryData(
+          ["posts", { id: context.postId }],
+          context.previousSingle,
+        );
     },
-    onSettled: () => {
-      // Dopo success o error, risincronizza con il server
-      // così likes è quello reale e non quello stimato
-      queryClient.invalidateQueries({
-        queryKey: ["posts", filtersStringified],
-      });
+    onSettled: (_data, _error, { postId }) => {
+      // Invalida entrambi in parallelo
+      return Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["posts", filtersStringified],
+        }),
+        queryClient.invalidateQueries({ queryKey: ["posts", { id: postId }] }),
+      ]);
     },
   });
 }

@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Post } from "../post.type";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle } from "lucide-react";
+import { Heart } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import placeholder from "../../../public/placeholder.jpg";
@@ -17,6 +17,8 @@ import { Country } from "@/components/ui/CountryDropdown";
 import { cn } from "@/lib/utils";
 import { useLikeMutation } from "../post.queries";
 import { useAuthUserStore } from "@/features/auth/auth.store";
+import { SessionExpiredError } from "@/lib/backend";
+import { CommentsDialog } from "@/features/comment/components/CommentsDialog";
 
 type PostProps = {
   post: Post;
@@ -25,7 +27,7 @@ type PostProps = {
 const PostCard = ({ post }: PostProps) => {
   const token = useAuthUserStore((state) => state.token);
 
-  const { mutate, isPending } = useLikeMutation();
+  const { mutate } = useLikeMutation();
 
   const country = countries.all.find(
     (country: Country) => country.alpha3 === post.country,
@@ -48,9 +50,8 @@ const PostCard = ({ post }: PostProps) => {
         <div className="flex gap-2 z-2">
           <Button
             variant={"outline"}
-            disabled={isPending}
             onClick={() => {
-              if (!token) return;
+              if (!token) throw new SessionExpiredError();
               mutate({ postId: post.id, token });
             }}
           >
@@ -61,9 +62,7 @@ const PostCard = ({ post }: PostProps) => {
             />{" "}
             {post.likes}
           </Button>
-          <Button variant={"outline"}>
-            <MessageCircle />
-          </Button>
+          <CommentsDialog post={post} />
         </div>
         <small>{post.author?.username}</small>
         <CardTitle className="flex gap-2">
