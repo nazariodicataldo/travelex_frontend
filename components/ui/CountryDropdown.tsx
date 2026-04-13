@@ -37,14 +37,15 @@ export type Country = {
   languages: string[];
   name: string;
   status: string;
-}
+};
 
 // Dropdown props
 interface CountryDropdownProps {
   id?: string;
   ariaLabelledby?: string;
   options?: Country[];
-  onChange?: (country: Country) => void;
+  onChange?: (country: Country | undefined) => void;
+  classList?: string;
   defaultValue?: string;
   disabled?: boolean;
   placeholder?: string;
@@ -59,6 +60,7 @@ const CountryDropdownComponent = (
     ),
     id,
     ariaLabelledby,
+    classList,
     onChange,
     defaultValue,
     disabled = false,
@@ -92,15 +94,24 @@ const CountryDropdownComponent = (
 
   const handleSelect = useCallback(
     (country: Country) => {
-      setSelectedCountry(country);
-      onChange?.(country);
+      /* Se l'utente riseleziona la stessa nazionalità, resetta la select */
+      if (selectedCountry === country) {
+        onChange?.(undefined);
+        setSelectedCountry(undefined);
+      } else {
+        setSelectedCountry(country);
+        onChange?.(country);
+      }
+      /* setSelectedCountry(country);
+      onChange?.(country); */
       setOpen(false);
     },
     [onChange],
   );
 
   const triggerClasses = cn(
-    "flex h-10 w-full items-center justify-between whitespace-nowrap rounded-sm border border-input bg-input/60 px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+    "flex h-10 w-full items-center justify-between whitespace-nowrap rounded-sm border border-input bg-input px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+    classList,
     slim === true && "w-20",
   );
 

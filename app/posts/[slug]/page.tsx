@@ -93,6 +93,8 @@ export default function SinglePost() {
             <h1 className="text-primary w-3/4">{post.location}</h1>
             {/* Actions */}
             <div className="flex gap-2">
+              {/* Only for owner */}
+              {/* Delete Post */}
               {/* Likes */}
               <Button
                 variant={"outline"}

@@ -1,8 +1,5 @@
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import CountrySelect from "@/components/ui/CountrySelect";
+import Search from "@/components/ui/Search";
 import { getAuthToken } from "@/features/auth/auth.actions";
 import PostsGrid from "@/features/post/components/PostsGrid";
 import { PostParams, PostService } from "@/features/post/post.service";
@@ -11,7 +8,6 @@ import {
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
-import { Compass } from "lucide-react";
 
 export const DEFAULT_PARAMS: PostParams = {
   order: "asc",
@@ -38,15 +34,11 @@ export default async function Home() {
         <p className="text-muted-foreground text-lg font-medium">
           Curated narratives from the world&apos;s most evocative corners.
         </p>
-        <InputGroup className="w-full md:max-w-sm lg:max-w-lg py-6 ">
-          <InputGroupInput
-            placeholder="Where does your soul need to go?"
-            className="h-8"
-          />
-          <InputGroupAddon>
-            <Compass className="size-5 text-primary" />
-          </InputGroupAddon>
-        </InputGroup>
+        <div className="flex gap-2 w-full md:max-w-sm lg:max-w-lg">
+          <Search />
+          <CountrySelect />
+          
+        </div>
       </section>
 
       {/* Griglia Post */}
