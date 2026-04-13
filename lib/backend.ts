@@ -1,9 +1,22 @@
+export type Meta = {
+  total: number;
+  currentPage: number;
+  lastPage: number;
+  perPage: number;
+  next: string | null;
+  prev: string | null;
+  allPages: {
+    [key: string]: string;
+  }[];
+};
+
 export type BackendResponse<T = unknown> =
   | {
       success: true;
       timestamp: string;
       data: T;
       message?: string;
+      meta: Meta;
     }
   | {
       success: false;

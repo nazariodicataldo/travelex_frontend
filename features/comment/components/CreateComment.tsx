@@ -13,6 +13,7 @@ import { handleCommentCreation } from "../comment.actions";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useFilterStore } from "@/lib/store";
+import { getErrorMessage } from "@/lib/utils";
 
 const createCommentSchema = z.object({
   comment: z.string().min(3).max(600),
@@ -24,6 +25,9 @@ export default function CreateComment({ postId }: { postId: string }) {
   const { control, handleSubmit, reset, formState } =
     useForm<CreateCommentData>({
       resolver: zodResolver(createCommentSchema),
+      defaultValues: {
+        comment: "",
+      },
     });
 
   //mi prendo i filtri dallo store
@@ -36,7 +40,7 @@ export default function CreateComment({ postId }: { postId: string }) {
       const newData = { ...data, travel_post_id: postId };
       await handleCommentCreation(newData);
       toast.success("Comment has been created", { position: "bottom-right" });
-      reset();
+      reset({ comment: "" });
 
       // invalido sia la query per il singolo post che le query di tutti i post
       queryClient.invalidateQueries({
@@ -50,10 +54,9 @@ export default function CreateComment({ postId }: { postId: string }) {
         queryKey: ["posts", filtersStringified],
       });
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Form submission error",
-        { position: "bottom-right" },
-      );
+      toast.error(getErrorMessage(error, "Form submission error"), {
+        position: "bottom-right",
+      });
     }
   }
 
@@ -69,6 +72,7 @@ export default function CreateComment({ postId }: { postId: string }) {
               <Textarea
                 {...field}
                 id="comment"
+                disabled={formState.isSubmitting}
                 aria-invalid={fieldState.invalid}
                 placeholder="Write your comment on the post..."
                 autoComplete="off"

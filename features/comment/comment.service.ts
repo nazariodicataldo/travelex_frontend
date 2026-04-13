@@ -13,4 +13,14 @@ export class CommentService {
       token,
     );
   }
+
+  static async delete(commentId: string, token: string) {
+    return await myFetch<null>(
+      `/comments/${commentId}`,
+      {
+        method: "DELETE",
+      },
+      token,
+    );
+  }
 }

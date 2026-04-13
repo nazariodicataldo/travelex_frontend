@@ -14,3 +14,12 @@ export async function handleCommentCreation(
 
   return await CommentService.store(data, token);
 }
+
+export async function handleCommentDelete(commentId: string) {
+  //mi prendo il token
+  const token = await getAuthToken();
+
+  if (!token) throw new Error("Unauthorized");
+
+  return await CommentService.delete(commentId, token);
+}
