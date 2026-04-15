@@ -5,7 +5,7 @@ import {
   useSinglePostQuery,
 } from "@/features/post/post.queries";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import placeholder from "@/public/placeholder.jpg";
 import {
   Breadcrumb,
@@ -20,11 +20,26 @@ import { countries } from "country-data-list";
 import { CircleFlag } from "react-circle-flags";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Heart, MessageCircle, Pencil, Trash2 } from "lucide-react";
+import { cn, getErrorMessage } from "@/lib/utils";
 import Link from "next/link";
 import CommentsGrid from "@/features/comment/components/CommentsGrid";
 import { SessionExpiredError } from "@/lib/backend";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useState } from "react";
+import { deletePost } from "@/app/actions";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useFilterStore } from "@/lib/store";
 
 function LocationBadge({ country }: { country: Country }) {
   return (
@@ -43,8 +58,15 @@ export default function SinglePost() {
   //mi prendo l'id tramite la rotta
   const params = useParams();
   const { token } = useAuthUserStore();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { mutate } = useLikeMutation();
+
+  /* State della gestione della dialog */
+  const [open, setOpen] = useState(false);
+  const { user } = useAuthUserStore();
+  const { filters } = useFilterStore();
 
   const {
     data: post,
@@ -63,6 +85,36 @@ export default function SinglePost() {
   const country = countries.all.find(
     (country: Country) => country.alpha3 === post.country,
   );
+
+  async function handleClick() {
+    try {
+      /* Server Action che chiama il service */
+      await deletePost(post!.id);
+
+      /* Toast di conferma eliminazione */
+      toast.success("Post deleted successfully", {
+        position: "bottom-right",
+      });
+
+      //stringify dei filtri
+      const filtersStringified = JSON.stringify(filters);
+
+      queryClient.invalidateQueries({
+        queryKey: ["posts", filtersStringified],
+      });
+
+      /* Redirect sull'home page*/
+      router.push("/");
+    } catch (error) {
+      console.error(error);
+      const errorMessage = getErrorMessage(error, "Cannot delete the post");
+      toast.error(errorMessage, {
+        position: "bottom-right",
+      });
+    } finally {
+      setOpen(false);
+    }
+  }
 
   return (
     <section>
@@ -93,8 +145,6 @@ export default function SinglePost() {
             <h1 className="text-primary w-3/4">{post.location}</h1>
             {/* Actions */}
             <div className="flex gap-2">
-              {/* Only for owner */}
-              {/* Delete Post */}
               {/* Likes */}
               <Button
                 variant={"outline"}
@@ -120,6 +170,56 @@ export default function SinglePost() {
                 <MessageCircle />
                 {post.commentsCount}
               </Button>
+              {/* Only for owner */}
+              {user?.id === post.author?.id && (
+                <>
+                  {/*  Update Post */}
+                  <Button
+                    variant={"ghost"}
+                    nativeButton={false}
+                    render={<Link href={`/update-post?postId=${post.id}`} />}
+                  >
+                    <Pencil />
+                    Update post
+                  </Button>
+                  {/* Delete Post */}
+                  <Dialog
+                    defaultOpen={open}
+                    open={open}
+                    onOpenChange={() => setOpen(!open)}
+                  >
+                    <DialogTrigger
+                      render={
+                        <Button
+                          variant={"destructive"}
+                          onClick={() => setOpen(true)}
+                        />
+                      }
+                    >
+                      <Trash2 />
+                      Delete post
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Are you absolutely sure?</DialogTitle>
+                        <DialogDescription>
+                          This action cannot be undone. This will permanently
+                          delete your account and remove your data from our
+                          servers.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <DialogClose render={<Button variant="outline" />}>
+                          Cancel
+                        </DialogClose>
+                        <Button type="submit" onClick={() => handleClick()}>
+                          Delete post
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </>
+              )}
             </div>
           </div>
           <p className="text-lg text-card-foreground">{post.description}</p>

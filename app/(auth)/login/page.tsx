@@ -10,13 +10,13 @@ import Link from "next/link";
 const LoginPage = () => {
   return (
     <>
-      <CardHeader className="gap-6">
+      <CardHeader className="gap-6 mx-auto">
         <div>
           <CardTitle className="mb-1.5 text-2xl">
-            Sign in to Shadcn Studio
+            Login in to TravelEx
           </CardTitle>
           <CardDescription className="text-base">
-            Ship Faster and Focus on Growth.
+            Share your travel experiences.
           </CardDescription>
         </div>
       </CardHeader>

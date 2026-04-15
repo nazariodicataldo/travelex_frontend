@@ -56,4 +56,31 @@ export class PostService {
       token,
     );
   }
+
+  static async update(
+    postId: Post["id"],
+    data: CreatePostData,
+    token: string,
+  ): Promise<Post> {
+    const url = `/posts/${postId}`;
+
+    return await myFetch<Post>(
+      url,
+      {
+        body: JSON.stringify(data),
+        method: "PUT",
+      },
+      token,
+    );
+  }
+
+  static async destroy(postId: Post["id"], token: string): Promise<void> {
+    await myFetch<null>(
+      `/posts/${postId}`,
+      {
+        method: "DELETE",
+      },
+      token,
+    );
+  }
 }

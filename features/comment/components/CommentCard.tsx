@@ -55,7 +55,7 @@ const CommentCard = ({ comment }: { comment: Comment }) => {
     } catch (error) {
       console.error(error);
       const errorMessage = getErrorMessage(error, "Cannot delete the comment");
-      toast.success(errorMessage, {
+      toast.error(errorMessage, {
         position: "bottom-right",
       });
     } finally {

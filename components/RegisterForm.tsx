@@ -1,3 +1,4 @@
+"use client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -22,9 +23,7 @@ export const registerSchema = z.object({
   termsAndConditions: z.boolean(),
 });
 
-export const verifyEmailSchema = z.object({
-  code: z.string().max(6),
-});
+export type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterForm() {
   const form = useForm<z.infer<typeof registerSchema>>({
@@ -40,7 +39,6 @@ export default function RegisterForm() {
       toast.error("Failed to submit the form. Please try again.");
     }
   }
-
 
   return (
     <form

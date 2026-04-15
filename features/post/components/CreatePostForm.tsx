@@ -6,37 +6,99 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Country, CountryDropdown } from "@/components/ui/CountryDropdown";
 import { Button } from "@/components/ui/button";
-import { createPost } from "@/app/actions";
+import { createPost, updatePost } from "@/app/actions";
 import { toast } from "sonner";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { getErrorMessage } from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
+import { useFilterStore } from "@/lib/store";
 
 const createPostFormSchema = z.object({
-  location: z.string({ error: "Location required" }).min(1).max(30),
-  description: z.string({ error: "Description required" }).min(1).max(30),
-  country: z.string({ error: "Country required" }).min(1).max(30),
+  location: z.string({ error: "Location required" }).min(1).max(60),
+  description: z.string({ error: "Description required" }).min(1).max(600),
+  country: z.string({ error: "Country required" }).min(1).max(3),
 });
 
 export type CreatePostData = z.infer<typeof createPostFormSchema>;
 
-const CreatePostForm = () => {
+type CreatePostFormProps = {
+  defaultValue?: CreatePostData;
+  postId?: string;
+};
+
+const CreatePostForm = ({ defaultValue, postId }: CreatePostFormProps) => {
+  const router = useRouter();
+
+  //mi prendo i filtri dallo store
+  const { filters } = useFilterStore();
+
+  const queryClient = useQueryClient();
+
   const { register, handleSubmit, formState, control, reset } =
     useForm<CreatePostData>({
       resolver: zodResolver(createPostFormSchema),
+      defaultValues: {
+        location: defaultValue?.location || "",
+        country: defaultValue?.country || "",
+        description: defaultValue?.description || "",
+      },
     });
 
   const onSubmit = async (data: CreatePostData) => {
-    try {
-      await createPost(data);
-      toast.success("Post has been created", { position: "bottom-right" });
-      reset();
+    //se ci sono i defaultValues vuol dire che sto facendo un update
+    //quindi faccio una chiamata diversa
+    if (defaultValue && postId) {
+      try {
+        await updatePost(postId, data);
+        toast.success("Post has been updated", { position: "bottom-right" });
+        reset();
 
-      /* Redirect sull'home page*/
-      redirect("/");
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Form submission error",
-        { position: "bottom-right" },
-      );
+        /* Invalidiamo la query per mostrare il post aggiornato */
+        queryClient.invalidateQueries({
+          queryKey: ["posts", { id: postId }],
+        });
+
+        //stringify dei filtri
+        const filtersStringified = JSON.stringify(filters);
+
+        queryClient.invalidateQueries({
+          queryKey: ["posts", filtersStringified],
+        });
+
+        /* Redirect sul post appena aggiornato*/
+        router.push(`/posts/${postId}`);
+      } catch (error) {
+        toast.error(getErrorMessage(error, "Form submission error"), {
+          position: "bottom-right",
+        });
+      }
+    } else {
+      //se non ci sono, sto facendo una insert
+      try {
+        await createPost(data);
+        toast.success("Post has been created", { position: "bottom-right" });
+        reset();
+
+        /* Invalidiamo la query per mostrare il post aggiornato */
+        queryClient.invalidateQueries({
+          queryKey: ["posts", { id: postId }],
+        });
+
+        //stringify dei filtri
+        const filtersStringified = JSON.stringify(filters);
+
+        queryClient.invalidateQueries({
+          queryKey: ["posts", filtersStringified],
+        });
+
+        /* Redirect sull'home page*/
+        router.push("/");
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Form submission error",
+          { position: "bottom-right" },
+        );
+      }
     }
   };
 
@@ -77,8 +139,8 @@ const CreatePostForm = () => {
               placeholder="Select country"
               defaultValue={field.value}
               id="country"
-              onChange={(country: Country) => {
-                field.onChange(country.alpha3);
+              onChange={(country: Country | undefined) => {
+                if (country) field.onChange(country.alpha3);
               }}
               ariaLabelledby="country-label"
             />
@@ -111,7 +173,9 @@ const CreatePostForm = () => {
       </div>
 
       {/* Submit */}
-      <Button type="submit">Create post</Button>
+      <Button type="submit" disabled={formState.isSubmitting}>
+        {defaultValue ? "Update post" : "Create post"}
+      </Button>
     </form>
   );
 };
