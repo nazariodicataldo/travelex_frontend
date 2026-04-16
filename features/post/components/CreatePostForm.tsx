@@ -17,6 +17,7 @@ const createPostFormSchema = z.object({
   location: z.string({ error: "Location required" }).min(1).max(60),
   description: z.string({ error: "Description required" }).min(1).max(600),
   country: z.string({ error: "Country required" }).min(1).max(3),
+  img: z.file().optional(),
 });
 
 export type CreatePostData = z.infer<typeof createPostFormSchema>;
@@ -168,6 +169,25 @@ const CreatePostForm = ({ defaultValue, postId }: CreatePostFormProps) => {
         {formState.errors.description && (
           <small aria-live="polite" className="text-destructive text-xs">
             {formState.errors.description.message}
+          </small>
+        )}
+      </div>
+
+      {/* File */}
+      <div className="flex flex-col gap-1">
+        <label htmlFor="img" className="font-medium">
+          Image
+        </label>
+        <Input
+          id="img"
+          type="file"
+          {...register("img")}
+          placeholder="A picture of your trip"
+        />
+        {/* Messaggio di errore per l'immagine */}
+        {formState.errors.img && (
+          <small aria-live="polite" className="text-destructive text-xs">
+            {formState.errors.img.message}
           </small>
         )}
       </div>

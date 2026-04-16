@@ -1,5 +1,4 @@
 import { LoginFormData } from "@/components/LoginForm";
-import { http } from "@/lib/http";
 import { User } from "../user/user.type";
 import { myFetch } from "@/lib/backend";
 import { RegisterFormData } from "@/components/RegisterForm";
@@ -18,7 +17,10 @@ export class AuthService {
   }
 
   static async register(data: RegisterFormData) {
-    return await myFetch<Auth>
+    return await myFetch<Auth>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   }
 
   static async me(token: Auth["token"]): Promise<User> {

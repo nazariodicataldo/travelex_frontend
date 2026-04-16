@@ -1,132 +1,47 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { toast } from "sonner";
+import RegisterForm from "@/components/RegisterForm";
 import {
-  Field,
-  FieldLabel,
-  FieldDescription,
-  FieldError,
-} from "@/components/ui/field";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { AuthService } from "@/features/auth/auth.service";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import Link from "next/link";
 
-export const registerSchema = z.object({
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
-  email: z.email(),
-  password: z.string(),
-  passwordConfirmation: z.string(),
-  termsAndConditions: z.boolean(),
-});
-
-export const verifyEmailSchema = z.object({
-  code: z.string().max(6),
-});
-
-export default function RegisterForm() {
-  const form = useForm<z.infer<typeof registerSchema>>({
-    resolver: zodResolver(registerSchema),
-  });
-
-  async function onSubmit(values: z.infer<typeof registerSchema>) {
-    try {
-      console.log(values);
-      await AuthService.register(values);
-    } catch (error) {
-      console.error("Form submission error", error);
-      toast.error("Failed to submit the form. Please try again.");
-    }
-  }
-
-
+const RegisterPage = () => {
   return (
-    <form
-      onSubmit={form.handleSubmit(onSubmit)}
-      className="mx-auto max-w-3xl space-y-4"
-    >
-      <Field>
-        <FieldLabel htmlFor="firstName">Nome</FieldLabel>
-        <Input
-          id="firstName"
-          placeholder="Mario"
-          {...form.register("firstName")}
-        />
+    <div className="relative flex h-auto items-center justify-center overflow-x-hidden p-4 sm:px-6 lg:px-8">
+      <Card className="z-1 w-full border-none shadow-md sm:max-w-lg">
+        <CardHeader className="gap-6">
+          <div>
+            <CardTitle className="mb-1.5 text-2xl">
+              Register to TravelEx
+            </CardTitle>
+            <CardDescription className="text-base">
+              Share your travel experiences.
+            </CardDescription>
+          </div>
+        </CardHeader>
 
-        <FieldError>{form.formState.errors.firstName?.message}</FieldError>
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="lastName">cognome</FieldLabel>
-        <Input
-          id="lastName"
-          placeholder="Rossi"
-          {...form.register("lastName")}
-        />
+        <CardContent>
+          {/* Regster Form */}
+          <div className="space-y-4">
+            <RegisterForm />
 
-        <FieldError>{form.formState.errors.lastName?.message}</FieldError>
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="email">Email</FieldLabel>
-        <Input
-          id="email"
-          placeholder="mario.rossi@example.com"
-          inputMode="email"
-          {...form.register("email")}
-        />
-
-        <FieldError>{form.formState.errors.email?.message}</FieldError>
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="password">Password</FieldLabel>
-        <Input
-          id="password"
-          placeholder="********"
-          {...form.register("password")}
-        />
-
-        <FieldError>{form.formState.errors.password?.message}</FieldError>
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="passwordConfirmation">
-          Conferma password
-        </FieldLabel>
-        <Input
-          id="passwordConfirmation"
-          placeholder="********"
-          {...form.register("passwordConfirmation")}
-        />
-
-        <FieldError>
-          {form.formState.errors.passwordConfirmation?.message}
-        </FieldError>
-      </Field>
-      <Field className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
-        <Checkbox
-          id="termsAndConditions"
-          className={"w-4!"}
-          // {...form.register("termsAndConditions")}
-          checked={form.watch("termsAndConditions")}
-          onCheckedChange={(value) =>
-            form.setValue("termsAndConditions", value)
-          }
-        />
-        <div className="space-y-1 leading-none">
-          <FieldLabel htmlFor="termsAndConditions">
-            Termini e condizioni
-          </FieldLabel>
-          <FieldDescription>
-            Attivando la checkbox accetti i termini e le condizioni
-          </FieldDescription>
-          <FieldError>
-            {form.formState.errors.termsAndConditions?.message}
-          </FieldError>
-        </div>
-      </Field>
-      <Button type="submit" className={"w-full"}>
-        Registrati
-      </Button>
-    </form>
+            <p className="text-center text-muted-foreground">
+              Already registered?{" "}
+              <Link
+                href="/login"
+                className="text-card-foreground hover:underline"
+              >
+                Login
+              </Link>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
-}
+};
+
+export default RegisterPage;

@@ -22,7 +22,7 @@ import { Like } from "@/features/like/like.type";
 import PostCard from "@/features/post/components/PostCard";
 import { Post } from "@/features/post/post.type";
 import { useUserQuery } from "@/features/user/user.queries";
-import { Package, PlusIcon } from "lucide-react";
+import { PackageOpen, PlusIcon } from "lucide-react";
 import Link from "next/link";
 
 function FavoritePosts({ likes }: { likes: Like[] }) {
@@ -65,7 +65,7 @@ function EmptyPosts() {
     <Empty>
       <EmptyHeader>
         <EmptyMedia variant="icon">
-          <Package />
+          <PackageOpen className="text-primary size-6" />
         </EmptyMedia>
         <EmptyTitle>No Posts Loaded</EmptyTitle>
         <EmptyDescription>
@@ -120,7 +120,7 @@ const Me = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="pb-8 px-16">
-          {userDb.posts ? (
+          {userDb.posts.length ? (
             <PostsCarousel posts={userDb.posts} />
           ) : (
             <EmptyPosts />
@@ -139,7 +139,11 @@ const Me = () => {
           {userDb.likes.length ? (
             <FavoritePosts likes={userDb.likes} />
           ) : (
-            <span className="text-muted-foreground italic">Noting to show</span>
+            <div className="min-h-52 flex justify-center items-center">
+              <span className="text-muted-foreground italic">
+                Noting to show
+              </span>
+            </div>
           )}
         </CardContent>
       </Card>

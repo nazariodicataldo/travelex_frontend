@@ -6,7 +6,6 @@ import Header from "@/components/Header";
 import Providers from "./providers";
 import CreatePost from "@/components/CreatePost";
 import { Toaster } from "@/components/ui/sonner";
-import { getAuthToken } from "@/features/auth/auth.actions";
 
 const notoSerifHeading = Noto_Serif({
   subsets: ["latin"],

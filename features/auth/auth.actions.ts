@@ -3,9 +3,27 @@
 import { LoginFormData } from "@/components/LoginForm";
 import { AuthService } from "./auth.service";
 import { cookies } from "next/headers";
+import { RegisterFormData } from "@/components/RegisterForm";
 
 export async function handleLogin(values: LoginFormData) {
   const res = await AuthService.login(values);
+
+  const token = res.token;
+
+  if (!token) {
+    throw new Error("Token non valido");
+  }
+
+  (await cookies()).set("auth-token", token, {
+    httpOnly: true,
+    maxAge: 60 * 60, // 1 ora -> 3600 secondi
+  });
+
+  return res;
+}
+
+export async function handleRegister(values: RegisterFormData) {
+  const res = await AuthService.register(values);
 
   const token = res.token;
 

@@ -42,17 +42,17 @@ const LoggedView = ({ user, handleLogout, closeSheet }: LoggedViewProps) => {
     <DropdownMenu>
       <DropdownMenuTrigger
         className={
-          "font-semibold duration-300 px-4 py-3 text-2xl text-primary flex justify-between"
+          "font-semibold duration-300 px-4 py-3 text-2xl text-primary flex justify-between cursor-pointer"
         }
       >
         <p>Hello, {user.username}</p>
         <ChevronDown />
       </DropdownMenuTrigger>
       <DropdownMenuContent className={"text-[1rem]"}>
-        <DropdownMenuItem>
+        <DropdownMenuItem className={'cursor-pointer'}>
           <Link
             href={"/me"}
-            className="flex gap-1"
+            className="flex gap-1 w-full"
             onClick={() => closeSheet(false)}
           >
             <UserCircle /> Profile

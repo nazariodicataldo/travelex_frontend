@@ -53,7 +53,11 @@ export async function myFetch<T>(
   const resJson: BackendResponse<T> = await res.json();
 
   if (!resJson.success) {
-    throw new Error(resJson.errors);
+    throw new Error(
+      typeof resJson.errors === "string"
+        ? resJson.errors
+        : JSON.stringify(resJson.errors),
+    );
   }
   return resJson.data;
 }
