@@ -12,30 +12,63 @@ import { useRouter } from "next/navigation";
 import { getErrorMessage } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { useFilterStore } from "@/lib/store";
+import { FieldDescription } from "@/components/ui/field";
+import placeholder from "@/public/placeholder.jpg";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { myEnv } from "@/lib/backend";
 
 const createPostFormSchema = z.object({
   location: z.string({ error: "Location required" }).min(1).max(60),
   description: z.string({ error: "Description required" }).min(1).max(600),
   country: z.string({ error: "Country required" }).min(1).max(3),
-  img: z.file().optional(),
+  img: z
+    .custom<FileList | undefined>()
+    .optional()
+    .refine(
+      //Se non c'è nessun file o questo è minore di 2 Mega, il controllo passa
+      (files) => !files || files.length === 0 || files[0].size <= 2_097_152,
+      {
+        message: "Image can't be heavier than 2 Megabytes",
+      },
+    )
+    .refine(
+      (files) =>
+        //Se non c'è nessun file o il suo tipo è tra quelli ammessi, il controllo passa
+        !files ||
+        files.length === 0 ||
+        ["image/png", "image/jpeg", "image/webp", "image/jpg"].includes(
+          files[0].type,
+        ),
+      {
+        message: "Only PNG, JPEG, WEBP are allowed",
+      },
+    ),
 });
 
 export type CreatePostData = z.infer<typeof createPostFormSchema>;
 
 type CreatePostFormProps = {
-  defaultValue?: CreatePostData;
+  defaultValue?: Omit<CreatePostData, "img"> & { img?: string };
   postId?: string;
 };
 
 const CreatePostForm = ({ defaultValue, postId }: CreatePostFormProps) => {
+  //Prendo l'immagine attuale dal database (passata come prop al form)
+  const currentImgUrl = defaultValue?.img
+    ? `${myEnv.backendUrl}/${defaultValue.img}`
+    : null;
+
   const router = useRouter();
+  const [preview, setPreview] = useState<string | null>(currentImgUrl);
 
   //mi prendo i filtri dallo store
   const { filters } = useFilterStore();
 
   const queryClient = useQueryClient();
 
-  const { register, handleSubmit, formState, control, reset } =
+  const { register, handleSubmit, formState, control, reset, watch, setValue } =
     useForm<CreatePostData>({
       resolver: zodResolver(createPostFormSchema),
       defaultValues: {
@@ -103,15 +136,30 @@ const CreatePostForm = ({ defaultValue, postId }: CreatePostFormProps) => {
     }
   };
 
+  //Leggo l'immagine dal form
+  const fileList = watch("img");
+
+  useEffect(() => {
+    // Se l'utente seleziona un NUOVO file, crea la preview del file
+    if (fileList && fileList.length > 0) {
+      const file = fileList[0];
+      const url = URL.createObjectURL(file);
+      setPreview(url);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [fileList]);
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-4 w-full md:w-sm lg:w-lg mx-auto"
     >
+      {/* Ritorna al post */}
+      {defaultValue && <Link href={`/posts` + postId}>Go back to post</Link>}
       {/* Location */}
       <div className="flex flex-col gap-1">
         <label htmlFor="location" className="font-medium">
-          Location
+          Location <small className="text-destructive">*</small>
         </label>
         <Input
           id="location"
@@ -129,7 +177,7 @@ const CreatePostForm = ({ defaultValue, postId }: CreatePostFormProps) => {
       {/* Country */}
       <div className="flex flex-col gap-1">
         <label htmlFor="country" id="country-label" className="font-medium">
-          Location
+          Country <small className="text-destructive">*</small>
         </label>
         <Controller
           name="country"
@@ -157,7 +205,7 @@ const CreatePostForm = ({ defaultValue, postId }: CreatePostFormProps) => {
       {/* Description */}
       <div className="flex flex-col gap-1">
         <label htmlFor="description" className="font-medium">
-          Description
+          Description <small className="text-destructive">*</small>
         </label>
         <Textarea
           id="description"
@@ -175,15 +223,40 @@ const CreatePostForm = ({ defaultValue, postId }: CreatePostFormProps) => {
 
       {/* File */}
       <div className="flex flex-col gap-1">
-        <label htmlFor="img" className="font-medium">
-          Image
+        <label htmlFor="picture" className="font-medium">
+          Image <small>Max 2 MB</small>
         </label>
-        <Input
-          id="img"
-          type="file"
-          {...register("img")}
-          placeholder="A picture of your trip"
+        <Image
+          src={preview || placeholder}
+          width={500}
+          height={500}
+          alt="Post picture"
+          unoptimized
         />
+        <Input
+          id="picture"
+          type="file"
+          accept="image/*"
+          /* onChange={(e) => console.log} */
+          placeholder="Select post image"
+          {...register("img")}
+        />
+        <FieldDescription className="flex items-center justify-between">
+          <span>Select a picture to upload.</span>
+          {preview && (
+            <Button
+              variant={"destructive"}
+              onClick={() => {
+                if (preview) URL.revokeObjectURL(preview); // Libera la RAM subito
+                //rimuovo sia l'immagine dal field e rendo null la preview
+                setValue("img", undefined);
+                setPreview(null);
+              }}
+            >
+              Remove picture
+            </Button>
+          )}
+        </FieldDescription>
         {/* Messaggio di errore per l'immagine */}
         {formState.errors.img && (
           <small aria-live="polite" className="text-destructive text-xs">

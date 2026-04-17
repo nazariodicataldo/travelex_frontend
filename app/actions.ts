@@ -10,7 +10,14 @@ export async function createPost(data: CreatePostData): Promise<Post> {
 
   if (!token) throw new Error("Unauthorized");
 
-  return await PostService.store(data, token);
+  const file = data.img?.[0];
+
+  const newData = {
+    ...data,
+    img: file,
+  };
+
+  return await PostService.store(newData, token);
 }
 
 export async function updatePost(postId: string, data: CreatePostData) {
@@ -18,7 +25,14 @@ export async function updatePost(postId: string, data: CreatePostData) {
 
   if (!token) throw new Error("Unauthorized");
 
-  return await PostService.update(postId, data, token);
+  const file = data.img?.[0];
+
+  const newData = {
+    ...data,
+    img: file,
+  };
+
+  return await PostService.update(postId, newData, token);
 }
 
 export async function deletePost(postId: string): Promise<void> {

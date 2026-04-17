@@ -17,8 +17,9 @@ import { Country } from "@/components/ui/CountryDropdown";
 import { cn } from "@/lib/utils";
 import { useLikeMutation } from "../post.queries";
 import { useAuthUserStore } from "@/features/auth/auth.store";
-import { SessionExpiredError } from "@/lib/backend";
+import { myEnv, SessionExpiredError } from "@/lib/backend";
 import { CommentsDialog } from "@/features/comment/components/CommentsDialog";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 type PostProps = {
   post: Post;
@@ -42,8 +43,12 @@ const PostCard = ({ post }: PostProps) => {
       />
       <CardHeader className="p-0 -my-4">
         <Image
-          src={post.img || placeholder}
+          src={post.img ? `${myEnv.backendUrl}/${post.img}` : placeholder}
+          width={256}
+          height={256}
+          className="object-cover w-full"
           alt={`Featured image about ${post.author?.username}'s post`}
+          unoptimized
         />
       </CardHeader>
       <CardFooter className="flex flex-col gap-2 items-start bg-card">
@@ -64,7 +69,14 @@ const PostCard = ({ post }: PostProps) => {
           </Button>
           <CommentsDialog post={post} />
         </div>
-        <small>{post.author?.username}</small>
+        <small className="flex gap-2 items-center my-2">
+          <Avatar className={"size-6"}>
+            <AvatarImage
+              src={`https://api.dicebear.com/9.x/thumbs/svg?seed=${post.author?.username}`}
+            />
+          </Avatar>
+          <span>{post.author?.username}</span>
+        </small>
         <CardTitle className="flex gap-2">
           {country !== undefined && (
             <CircleFlag

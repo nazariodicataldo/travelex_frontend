@@ -35,10 +35,13 @@ export async function myFetch<T>(
   init?: RequestInit,
   token?: string,
 ) {
+  const isFormData = init?.body instanceof FormData;
+
   const res = await fetch(myEnv.backendUrlApi + input, {
     ...init,
     headers: {
-      "Content-Type": "application/json",
+      // Imposta JSON solo se NON è un FormData
+      ...(!isFormData && { "Content-Type": "application/json" }),
       Accept: "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...init?.headers,
@@ -53,6 +56,8 @@ export async function myFetch<T>(
   const resJson: BackendResponse<T> = await res.json();
 
   if (!resJson.success) {
+    const errorData = await res.json().catch(() => ({}));
+    console.log("ERRORE LARAVEL:", errorData);
     throw new Error(
       typeof resJson.errors === "string"
         ? resJson.errors

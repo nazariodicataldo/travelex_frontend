@@ -15,6 +15,7 @@ const UpdatePost = () => {
     location: post?.location ?? "",
     country: post?.country ?? "",
     description: post?.description ?? "",
+    img: post?.img ?? "",
   };
 
   return (

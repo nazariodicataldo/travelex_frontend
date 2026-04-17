@@ -38,19 +38,24 @@ export class PostService {
     return myFetch<Post>(`/posts/${id}`, undefined, token);
   }
 
-  static async store(data: CreatePostData, token: string): Promise<Post> {
-    /* return http.post<unknown, Post>("/posts", data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-    }); */
+  static async store(
+    data: Omit<CreatePostData, "img"> & { img: File | undefined },
+    token: string,
+  ): Promise<Post> {
+    const formData = new FormData();
+
+    formData.append("location", data.location);
+    formData.append("description", data.description);
+    formData.append("country", data.country);
+
+    if (data.img instanceof File) {
+      formData.append("img", data.img);
+    }
 
     return await myFetch<Post>(
       "/posts",
       {
-        body: JSON.stringify(data),
+        body: formData,
         method: "POST",
       },
       token,
@@ -59,16 +64,25 @@ export class PostService {
 
   static async update(
     postId: Post["id"],
-    data: CreatePostData,
+    data: Omit<CreatePostData, "img"> & { img: File | undefined },
     token: string,
   ): Promise<Post> {
     const url = `/posts/${postId}`;
+
+    let headerContentType = "application/json";
+    //controllo se è presente l'immagine
+    if (data.img) {
+      headerContentType = "multipart/form-data";
+    }
 
     return await myFetch<Post>(
       url,
       {
         body: JSON.stringify(data),
         method: "PUT",
+        headers: {
+          "Content-Type": headerContentType,
+        },
       },
       token,
     );

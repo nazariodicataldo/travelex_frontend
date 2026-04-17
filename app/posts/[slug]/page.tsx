@@ -24,7 +24,7 @@ import { Heart, MessageCircle, Pencil, Trash2 } from "lucide-react";
 import { cn, getErrorMessage } from "@/lib/utils";
 import Link from "next/link";
 import CommentsGrid from "@/features/comment/components/CommentsGrid";
-import { SessionExpiredError } from "@/lib/backend";
+import { myEnv, SessionExpiredError } from "@/lib/backend";
 import {
   Dialog,
   DialogClose,
@@ -132,11 +132,12 @@ export default function SinglePost() {
       </Breadcrumb>
       <figure className="flex gap-4 mt-2 flex-col">
         <Image
-          src={post.img || placeholder}
+          src={post.img ? `${myEnv.backendUrl}/${post.img}` : placeholder}
           alt={post.location}
           width={500}
           height={500}
           className="aspect-square lg:aspect-video w-full object-cover"
+          unoptimized
         />
         <figcaption className="flex flex-col gap-6">
           {/* Country */}
