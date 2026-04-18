@@ -46,7 +46,7 @@ const PostCard = ({ post }: PostProps) => {
           src={post.img ? `${myEnv.backendUrl}/${post.img}` : placeholder}
           width={256}
           height={256}
-          className="object-cover w-full"
+          className="object-cover w-full aspect-video"
           alt={`Featured image about ${post.author?.username}'s post`}
           unoptimized
         />

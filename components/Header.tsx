@@ -26,8 +26,8 @@ const links = [
     href: "/",
   },
   {
-    title: "Hot",
-    href: "/hot",
+    title: "Dashboard",
+    href: "/dashboard",
   },
 ] as const;
 
@@ -49,7 +49,7 @@ const LoggedView = ({ user, handleLogout, closeSheet }: LoggedViewProps) => {
         <ChevronDown />
       </DropdownMenuTrigger>
       <DropdownMenuContent className={"text-[1rem]"}>
-        <DropdownMenuItem className={'cursor-pointer'}>
+        <DropdownMenuItem className={"cursor-pointer"}>
           <Link
             href={"/me"}
             className="flex gap-1 w-full"

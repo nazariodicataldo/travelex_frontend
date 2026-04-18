@@ -35,7 +35,7 @@ export class PostService {
   }
 
   static async show(id: string, token?: string): Promise<Post> {
-    return myFetch<Post>(`/posts/${id}`, undefined, token);
+    return await myFetch<Post>(`/posts/${id}`, undefined, token);
   }
 
   static async store(

@@ -7,4 +7,7 @@ export type User = {
   email: string;
   likes: Like[];
   posts: Post[];
+  commentsCount?: number;
+  likesCount?: number;
+  postsCount?: number;
 };

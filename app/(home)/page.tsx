@@ -37,7 +37,6 @@ export default async function Home() {
         <div className="flex gap-2 w-full md:max-w-sm lg:max-w-lg">
           <Search />
           <CountrySelect />
-          
         </div>
       </section>
 

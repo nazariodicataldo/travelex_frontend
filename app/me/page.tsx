@@ -44,12 +44,12 @@ function FavoritePosts({ likes }: { likes: Like[] }) {
   );
 }
 
-function PostsCarousel({ posts }: { posts: Post[] }) {
+export function PostsCarousel({ posts }: { posts: Post[] }) {
   return (
     <Carousel>
       <CarouselContent>
         {posts.map((post) => (
-          <CarouselItem key={post.id} className="md:basis-1/2 lg:basis-1/3">
+          <CarouselItem key={post.id} className="md:basis-1/2 lg:basis-1/3 my-2">
             <PostCard post={post} />
           </CarouselItem>
         ))}
