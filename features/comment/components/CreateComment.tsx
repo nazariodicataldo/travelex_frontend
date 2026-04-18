@@ -12,7 +12,7 @@ import z from "zod";
 import { handleCommentCreation } from "../comment.actions";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { useFilterStore } from "@/lib/store";
+import { useFilterStore, useSessionExpiredDialogStore } from "@/lib/store";
 import { getErrorMessage } from "@/lib/utils";
 
 const createCommentSchema = z.object({
@@ -32,6 +32,7 @@ export default function CreateComment({ postId }: { postId: string }) {
 
   //mi prendo i filtri dallo store
   const { filters } = useFilterStore();
+  const { setOpen } = useSessionExpiredDialogStore();
 
   const queryClient = useQueryClient();
 
@@ -54,9 +55,10 @@ export default function CreateComment({ postId }: { postId: string }) {
         queryKey: ["posts", filtersStringified],
       });
     } catch (error) {
-      toast.error(getErrorMessage(error, "Form submission error"), {
+      setOpen(true);
+      /* toast.error(getErrorMessage(error, "Form submission error"), {
         position: "bottom-right",
-      });
+      }); */
     }
   }
 

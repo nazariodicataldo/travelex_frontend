@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Providers from "./providers";
 import CreatePost from "@/components/CreatePost";
 import { Toaster } from "@/components/ui/sonner";
+import { SessionExpiredDialog } from "@/components/SessionExpiredDialog";
 
 const notoSerifHeading = Noto_Serif({
   subsets: ["latin"],
@@ -53,6 +54,7 @@ export default async function RootLayout({
         <main className="my-12 container mx-auto px-4">
           <Providers>{children}</Providers>
           <CreatePost />
+          <SessionExpiredDialog />
         </main>
         <Toaster />
       </body>

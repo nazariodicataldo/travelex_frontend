@@ -24,7 +24,7 @@ import { Heart, MessageCircle, Pencil, Trash2 } from "lucide-react";
 import { cn, getErrorMessage } from "@/lib/utils";
 import Link from "next/link";
 import CommentsGrid from "@/features/comment/components/CommentsGrid";
-import { myEnv, SessionExpiredError } from "@/lib/backend";
+import { myEnv } from "@/lib/backend";
 import {
   Dialog,
   DialogClose,
@@ -39,7 +39,7 @@ import { useState } from "react";
 import { deletePost } from "@/app/actions";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { useFilterStore } from "@/lib/store";
+import { useFilterStore, useSessionExpiredDialogStore } from "@/lib/store";
 
 function LocationBadge({ country }: { country: Country }) {
   return (
@@ -60,6 +60,8 @@ export default function SinglePost() {
   const { token } = useAuthUserStore();
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  const { setOpen: setSessionDialogOpen } = useSessionExpiredDialogStore();
 
   const { mutate } = useLikeMutation();
 
@@ -150,7 +152,10 @@ export default function SinglePost() {
               <Button
                 variant={"outline"}
                 onClick={() => {
-                  if (!token) throw new SessionExpiredError();
+                  if (!token) {
+                    setSessionDialogOpen(true);
+                    return;
+                  }
                   mutate({ postId: post.id, token });
                 }}
               >

@@ -17,9 +17,10 @@ import { Country } from "@/components/ui/CountryDropdown";
 import { cn } from "@/lib/utils";
 import { useLikeMutation } from "../post.queries";
 import { useAuthUserStore } from "@/features/auth/auth.store";
-import { myEnv, SessionExpiredError } from "@/lib/backend";
+import { myEnv } from "@/lib/backend";
 import { CommentsDialog } from "@/features/comment/components/CommentsDialog";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { useSessionExpiredDialogStore } from "@/lib/store";
 
 type PostProps = {
   post: Post;
@@ -27,6 +28,7 @@ type PostProps = {
 
 const PostCard = ({ post }: PostProps) => {
   const token = useAuthUserStore((state) => state.token);
+  const { setOpen } = useSessionExpiredDialogStore();
 
   const { mutate } = useLikeMutation();
 
@@ -56,7 +58,10 @@ const PostCard = ({ post }: PostProps) => {
           <Button
             variant={"outline"}
             onClick={() => {
-              if (!token) throw new SessionExpiredError();
+              if (!token) {
+                setOpen(true);
+                return;
+              }
               mutate({ postId: post.id, token });
             }}
           >

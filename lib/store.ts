@@ -27,3 +27,21 @@ export const useFilterStore = create<FilterStore>()(
     },
   ),
 );
+
+export type SessionExpiredDialogStore = {
+  open: boolean;
+  setOpen: (newState: boolean) => void;
+};
+
+//Store per la Dialog
+export const useSessionExpiredDialogStore = create<SessionExpiredDialogStore>()(
+  persist(
+    (set) => ({
+      open: false,
+      setOpen: (newState) => set(() => ({ open: newState })),
+    }),
+    {
+      name: "sessionExpiredStore",
+    },
+  ),
+);
