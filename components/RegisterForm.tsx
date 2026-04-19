@@ -22,9 +22,21 @@ import { getErrorMessage } from "@/lib/utils";
 export const registerSchema = z.object({
   username: z.string().min(1),
   email: z.email(),
-  password: z.string(),
+  password: z
+    .string()
+    .min(8)
+    .regex(/[a-z]/g, { error: "Devi inserire almeno una minuscola" })
+    .regex(/[A-Z]/g, { error: "Devi inserire almeno una maiuscola" })
+    .regex(/[0-9]/g, { error: "Devi inserire almeno un numero" })
+    .regex(/[!?$&=?]/g, {
+      error: "Devi inserire almeno un simbolo tra !?$&=?",
+    }),
   password_confirmation: z.string(),
   termsAndConditions: z.boolean(),
+});
+Z.refine((data) => data.password === data.password_confirmation, {
+  message: "Le due password non coincidono",
+  path: ["password_confirmation"],
 });
 
 export type RegisterFormData = z.infer<typeof registerSchema>;
@@ -115,13 +127,13 @@ export default function RegisterForm() {
         <FieldError>{form.formState.errors.password?.message}</FieldError>
       </Field>
       <Field>
-        <FieldLabel htmlFor="passwordConfirmation">
+        <FieldLabel htmlFor="password_confirmation">
           Password Confirmation
         </FieldLabel>
         <div className="relative">
           <Input
             type={showPasswordConfirmation ? "text" : "password"}
-            id="passwordConfirmation"
+            id="password_confirmation"
             placeholder="********"
             {...form.register("password_confirmation")}
           />

@@ -56,8 +56,6 @@ export async function myFetch<T>(
   const resJson: BackendResponse<T> = await res.json();
 
   if (!resJson.success) {
-    const errorData = await res.json().catch(() => ({}));
-    console.log("ERRORE LARAVEL:", errorData);
     throw new Error(
       typeof resJson.errors === "string"
         ? resJson.errors

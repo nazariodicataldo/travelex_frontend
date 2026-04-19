@@ -7,6 +7,7 @@ import { useAuthUserStore } from "@/features/auth/auth.store";
 import { getErrorMessage } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -90,9 +91,9 @@ export default function LoginForm() {
         <FieldError>{form.formState.errors.password?.message}</FieldError>
       </Field>
 
-      {/* <Link href="/password-recovery" className="inline-block">
-        Password dimenticata?
-      </Link> */}
+      <Link href="/password-recovery" className="inline-block">
+        Reset Password
+      </Link>
 
       <Button
         type="submit"
