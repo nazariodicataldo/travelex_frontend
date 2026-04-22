@@ -18,7 +18,7 @@ import { handleCommentDelete } from "../comment.actions";
 import { toast } from "sonner";
 import { useAuthUserStore } from "@/features/auth/auth.store";
 import { useQueryClient } from "@tanstack/react-query";
-import { useFilterStore } from "@/lib/store";
+import { useFilterStore, useSessionExpiredDialogStore } from "@/lib/store";
 import { useState } from "react";
 import { getErrorMessage } from "@/lib/utils";
 
@@ -29,6 +29,8 @@ const CommentCard = ({ comment }: { comment: Comment }) => {
   const { user } = useAuthUserStore();
   //mi prendo i filtri dallo store
   const { filters } = useFilterStore();
+
+  const { setOpen: setSessionDialogOpen } = useSessionExpiredDialogStore();
 
   const queryClient = useQueryClient();
 
@@ -53,11 +55,12 @@ const CommentCard = ({ comment }: { comment: Comment }) => {
         queryKey: ["posts", filtersStringified],
       });
     } catch (error) {
-      console.error(error);
+      /* console.error(error);
       const errorMessage = getErrorMessage(error, "Cannot delete the comment");
       toast.error(errorMessage, {
         position: "bottom-right",
-      });
+      }); */
+      setSessionDialogOpen(true);
     } finally {
       setOpen(false);
     }

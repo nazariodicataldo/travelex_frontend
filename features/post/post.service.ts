@@ -64,25 +64,32 @@ export class PostService {
 
   static async update(
     postId: Post["id"],
-    data: Omit<CreatePostData, "img"> & { img: File | undefined },
+    data: Omit<CreatePostData, "img"> & {
+      img: File | undefined;
+      remove_img: "false" | "true";
+    },
     token: string,
   ): Promise<Post> {
     const url = `/posts/${postId}`;
 
-    let headerContentType = "application/json";
-    //controllo se è presente l'immagine
-    if (data.img) {
-      headerContentType = "multipart/form-data";
+    const formData = new FormData();
+
+    formData.append("_method", "PUT");
+    formData.append("location", data.location);
+    formData.append("description", data.description);
+    formData.append("country", data.country);
+
+    if (data.img instanceof File) {
+      formData.append("img", data.img);
+    } else if(data.remove_img === 'true') {
+      formData.set("img", "");
     }
 
     return await myFetch<Post>(
       url,
       {
-        body: JSON.stringify(data),
-        method: "PUT",
-        headers: {
-          "Content-Type": headerContentType,
-        },
+        body: formData,
+        method: "POST",
       },
       token,
     );

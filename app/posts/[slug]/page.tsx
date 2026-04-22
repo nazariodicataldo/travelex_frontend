@@ -40,6 +40,7 @@ import { deletePost } from "@/app/actions";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useFilterStore, useSessionExpiredDialogStore } from "@/lib/store";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 function LocationBadge({ country }: { country: Country }) {
   return (
@@ -108,11 +109,12 @@ export default function SinglePost() {
       /* Redirect sull'home page*/
       router.push("/");
     } catch (error) {
-      console.error(error);
+      /* console.error(error);
       const errorMessage = getErrorMessage(error, "Cannot delete the post");
       toast.error(errorMessage, {
         position: "bottom-right",
-      });
+      }); */
+      setSessionDialogOpen(true);
     } finally {
       setOpen(false);
     }
@@ -144,8 +146,19 @@ export default function SinglePost() {
         <figcaption className="flex flex-col gap-6">
           {/* Country */}
           {country !== undefined && <LocationBadge country={country} />}
-          <div className="flex justify-between items-center">
-            <h1 className="text-primary w-3/4">{post.location}</h1>
+          <div className="flex flex-col md:flex-row gap-6 items-start md:justify-between md:items-center">
+            <div className="flex flex-col gap-2 w-3/4">
+              <h1 className="text-primary ">{post.location}</h1>
+              {/* Author */}
+              <div className="flex gap-2 items-center">
+                <Avatar>
+                  <AvatarImage
+                    src={`https://api.dicebear.com/9.x/thumbs/svg?seed=${post.author?.username}`}
+                  />
+                </Avatar>
+                <p>{post.author?.username}</p>
+              </div>
+            </div>
             {/* Actions */}
             <div className="flex gap-2">
               {/* Likes */}

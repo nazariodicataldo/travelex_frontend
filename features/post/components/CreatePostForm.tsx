@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { getErrorMessage } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
-import { useFilterStore } from "@/lib/store";
+import { useFilterStore, useSessionExpiredDialogStore } from "@/lib/store";
 import { FieldDescription } from "@/components/ui/field";
 import placeholder from "@/public/placeholder.jpg";
 import Image from "next/image";
@@ -63,6 +63,8 @@ const CreatePostForm = ({ defaultValue, postId }: CreatePostFormProps) => {
   const router = useRouter();
   const [preview, setPreview] = useState<string | null>(currentImgUrl);
 
+  const { setOpen } = useSessionExpiredDialogStore();
+
   //mi prendo i filtri dallo store
   const { filters } = useFilterStore();
 
@@ -83,7 +85,11 @@ const CreatePostForm = ({ defaultValue, postId }: CreatePostFormProps) => {
     //quindi faccio una chiamata diversa
     if (defaultValue && postId) {
       try {
-        await updatePost(postId, data);
+        const newData: CreatePostData & { remove_img: "false" | "true" } = {
+          ...data,
+          remove_img: preview ? "false" : "true",
+        };
+        await updatePost(postId, newData);
         toast.success("Post has been updated", { position: "bottom-right" });
         reset();
 
@@ -102,9 +108,10 @@ const CreatePostForm = ({ defaultValue, postId }: CreatePostFormProps) => {
         /* Redirect sul post appena aggiornato*/
         router.push(`/posts/${postId}`);
       } catch (error) {
-        toast.error(getErrorMessage(error, "Form submission error"), {
+        /* toast.error(getErrorMessage(error, "Form submission error"), {
           position: "bottom-right",
-        });
+        }); */
+        setOpen(true);
       }
     } else {
       //se non ci sono, sto facendo una insert
@@ -128,10 +135,11 @@ const CreatePostForm = ({ defaultValue, postId }: CreatePostFormProps) => {
         /* Redirect sull'home page*/
         router.push("/");
       } catch (error) {
-        toast.error(
+        /* toast.error(
           error instanceof Error ? error.message : "Form submission error",
           { position: "bottom-right" },
-        );
+        ); */
+        setOpen(true);
       }
     }
   };
@@ -155,7 +163,7 @@ const CreatePostForm = ({ defaultValue, postId }: CreatePostFormProps) => {
       className="flex flex-col gap-4 w-full md:w-sm lg:w-lg mx-auto"
     >
       {/* Ritorna al post */}
-      {defaultValue && <Link href={`/posts` + postId}>Go back to post</Link>}
+      {defaultValue && <Link href={`/posts/` + postId}>Go back to post</Link>}
       {/* Location */}
       <div className="flex flex-col gap-1">
         <label htmlFor="location" className="font-medium">

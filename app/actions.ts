@@ -20,7 +20,10 @@ export async function createPost(data: CreatePostData): Promise<Post> {
   return await PostService.store(newData, token);
 }
 
-export async function updatePost(postId: string, data: CreatePostData) {
+export async function updatePost(
+  postId: string,
+  data: CreatePostData & { remove_img: "false" | "true" },
+) {
   const token = (await cookies()).get("auth-token")?.value;
 
   if (!token) throw new Error("Unauthorized");
